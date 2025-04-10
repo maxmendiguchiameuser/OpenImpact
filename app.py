@@ -154,6 +154,53 @@ view_state = pdk.ViewState(
     zoom=6,
     pitch=60,
 )
+##############################################
+# === Custom HTML-based inline colorbar overlay ===
+colorbar_html = f"""
+<div style="
+    position: relative;
+    width: 100%;
+    height: 40px;
+    margin-top: 10px;
+    margin-bottom: -20px;
+">
+  <div style="
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(to right, #440154, #31688e, #35b779, #fde725);
+      width: 300px;
+      height: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+  "></div>
+  <div style="
+      position: absolute;
+      left: calc(50% - 150px);
+      top: 16px;
+      font-size: 10px;
+      color: #aaa;
+  ">{vmin:.2f}</div>
+  <div style="
+      position: absolute;
+      right: calc(50% - 150px);
+      top: 16px;
+      font-size: 10px;
+      color: #aaa;
+  ">{vmax:.2f}</div>
+  <div style="
+      position: absolute;
+      left: 50%;
+      top: 16px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #ccc;
+  ">{color_by}</div>
+</div>
+"""
+
+st.markdown(colorbar_html, unsafe_allow_html=True)
+############################################
 
 # Deck with tooltip
 st.pydeck_chart(pdk.Deck(
