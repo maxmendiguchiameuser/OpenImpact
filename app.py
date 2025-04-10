@@ -27,7 +27,7 @@ st.markdown("""
 </h2>
 """.format(
     # embed the image as base64
-    __import__('base64').b64encode(open("data/image.png", "rb").read()).decode()
+    __import__('base64').b64encode(open("data/image.jpg", "rb").read()).decode()
 ), unsafe_allow_html=True)
 
 # CSS styling inspired by contrails.org
