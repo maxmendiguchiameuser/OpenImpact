@@ -2,57 +2,78 @@ import streamlit as st
 import xarray as xr
 import pandas as pd
 import pydeck as pdk
+import numpy as np
 
-# Load NetCDF file
-@st.cache_data
-def load_data():
-    ds = xr.open_dataset(nc_file, engine="netCDF4")
-    return ds
+# Streamlit page setup
+st.set_page_config(
+    page_title="Flight Climate Impact Dashboard",
+    layout="wide",
+)
 
-ds = load_data()
+st.markdown("### Climate sensitivity [algorithmic climate change functions]")
 
-# Find all aCCF variables
+nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
+ds = xr.open_dataset(nc_file, engine="netcdf4")
+
+# Select aCCF variables
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
-st.sidebar.title("Settings")
-selected_var = st.sidebar.selectbox("Select aCCF variable", accf_vars)
+selected_var = st.selectbox("Select aCCF variable", accf_vars)
 
-# Get available pressure levels
-levels = ds['level'].values
-selected_level = st.sidebar.select_slider("Select pressure level (hPa)", options=levels)
-
-# Extract data
-subset = ds[selected_var].sel(level=selected_level)
+# Handle pressure level selection
+if "level" in ds.dims:
+    pressure_levels = ds["level"].values
+    selected_level = st.selectbox("Select pressure level (hPa)", pressure_levels)
+    var_data = ds[selected_var].sel(level=selected_level)
+else:
+    st.warning("No 'level' dimension found in this dataset.")
+    var_data = ds[selected_var]
 
 # Convert to DataFrame
-df = subset.to_dataframe().reset_index()
-df = df.dropna(subset=[selected_var])  # Drop missing values
+df = var_data.to_dataframe().reset_index()
+df = df.dropna(subset=[selected_var])
 
-# Rename for pydeck
+# Rename for PyDeck compatibility
 df = df.rename(columns={
-    "longitude": "lon",
-    "latitude": "lat",
-    selected_var: "value"
+    "longitude": "Longitude",
+    "latitude": "Latitude",
+    selected_var: "Value"
 })
 
-# Normalize value for color/weight scaling
-df["weight"] = (df["value"] - df["value"].min()) / (df["value"].max() - df["value"].min())
+# Keep only needed columns and ensure types are serializable
+df = df[["Longitude", "Latitude", "Value"]].astype({
+    "Longitude": float,
+    "Latitude": float,
+    "Value": float
+})
 
-# Display map
+# Normalize value to [0, 1]
+val_min, val_max = df["Value"].min(), df["Value"].max()
+df["Value"] = (df["Value"] - val_min) / (val_max - val_min + 1e-10)  # avoid div by zero
+
+# Create pydeck chart
 st.pydeck_chart(pdk.Deck(
-    map_style='mapbox://styles/mapbox/dark-v10',
+    map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
-        latitude=0,
-        longitude=0,
-        zoom=1,
+        latitude=df["Latitude"].mean(),
+        longitude=df["Longitude"].mean(),
+        zoom=3,
         pitch=0,
     ),
     layers=[
         pdk.Layer(
             "ScreenGridLayer",
             data=df,
-            get_position='[lon, lat]',
-            get_weight='weight',
+            pickable=True,
             cell_size_pixels=10,
+            color_range=[
+                [255, 255, 204],
+                [161, 218, 180],
+                [65, 182, 196],
+                [44, 127, 184],
+                [37, 52, 148]
+            ],
+            get_position="[Longitude, Latitude]",
+            get_weight="Value",
         )
-    ],
+    ]
 ))
