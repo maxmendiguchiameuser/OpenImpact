@@ -1,56 +1,76 @@
 import streamlit as st
 import xarray as xr
-import pydeck as pdk
 import pandas as pd
+import pydeck as pdk
+import numpy as np
 
-st.set_page_config(page_title="Flight Climate Impact Dashboard", layout="wide")
-st.markdown("### Climate sensitivity [algorithmic climate change functions]")
+# Streamlit page configuration
+st.set_page_config(
+    page_title="Flight Climate Impact Dashboard",
+    layout="wide",
+)
 
-# Load NetCDF data
-nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
-ds = xr.open_dataset(nc_file, engine="netcdf4")
+st.markdown("### Climate Sensitivity (Algorithmic Climate Change Functions)")
 
-# List aCCF variables
-accf_vars = [var for var in ds.data_vars if var.lower().startswith("aCCF")]
-if not accf_vars:
-    st.error("No variables starting with 'aCCF' found in dataset.")
+# Load NetCDF file
+nc_file = "data/env_processed_compressed.nc"
+try:
+    ds = xr.open_dataset(nc_file)  # Use default engine for better compatibility
+except Exception as e:
+    st.error(f"Failed to open NetCDF file: {e}")
     st.stop()
 
+# Filter for variables starting with 'aCCF'
+accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
+if not accf_vars:
+    st.warning("No aCCF variables found in the dataset.")
+    st.stop()
+
+# Variable selector
 selected_var = st.selectbox("Select aCCF variable", accf_vars)
 
-# Select pressure level
-if "level" in ds.coords:
+# Check if 'level' dimension exists for vertical selection
+if "level" in ds.dims:
     pressure_levels = ds["level"].values
-    level = st.selectbox("Select pressure level (hPa)", pressure_levels)
-    var_data = ds[selected_var].sel(level=level)
+    selected_level = st.selectbox("Select pressure level (hPa)", pressure_levels)
+    var_data = ds[selected_var].sel(level=selected_level)
 else:
-    st.warning("No 'level' coordinate found.")
+    st.warning("No 'level' dimension found in this dataset.")
     var_data = ds[selected_var]
 
-# Convert to DataFrame
+# Convert to DataFrame and drop NaNs
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
-# Rename for PyDeck compatibility
-if "longitude" in df.columns and "latitude" in df.columns:
-    df = df.rename(columns={
-        "longitude": "Longitude",
-        "latitude": "Latitude",
-        selected_var: "Value"
-    })
-else:
-    st.error("Missing required 'latitude' and 'longitude' columns.")
+# Rename columns for pydeck
+df = df.rename(columns={
+    "longitude": "Longitude",
+    "latitude": "Latitude",
+    selected_var: "Value"
+})
+
+# Check required columns exist
+if not all(col in df.columns for col in ["Longitude", "Latitude", "Value"]):
+    st.error("Missing required columns in data.")
     st.stop()
 
-# Normalize 'Value' column for consistent coloring
-df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
+# Ensure correct types
+df = df.astype({"Longitude": float, "Latitude": float, "Value": float})
 
-# Render map
+# Normalize value for color scaling
+min_val = df["Value"].min()
+max_val = df["Value"].max()
+if max_val - min_val == 0:
+    df["Value"] = 0  # Avoid division by zero
+else:
+    df["Value"] = (df["Value"] - min_val) / (max_val - min_val)
+
+# PyDeck Map Plot
 st.pydeck_chart(pdk.Deck(
     map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
-        latitude=df["Latitude"].mean(),
-        longitude=df["Longitude"].mean(),
+        latitude=float(df["Latitude"].mean()),
+        longitude=float(df["Longitude"].mean()),
         zoom=3,
         pitch=0,
     ),
