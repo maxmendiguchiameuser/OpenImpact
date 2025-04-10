@@ -97,69 +97,50 @@ with col2:
 
 #######################################################
 #######################################################
-
-st.markdown("### 3D Trajectory Visualization")
-
-color_by = st.radio("Color trajectory by:", ["Altitude", "Speed (VTAS)", "Climate Impact (pATR20_total)"], horizontal=True)
-
-# Choose column and color scale
-if color_by == "Altitude":
-    color_col = "alt"
-    color_label = "Altitude (ft)"
-elif color_by == "Speed (VTAS)":
-    color_col = "VTAS"
-    color_label = "Speed (VTAS)"
-elif color_by == "Climate Impact (pATR20_total)":
-    color_col = "pATR20_total"
-    color_label = "Climate Impact (K)"
-else:
-    color_col = "alt"
-    color_label = "Value"
-
-# Ensure clean numeric data
-df = df.dropna(subset=["poslat", "poslon", color_col])
-df["poslat"] = df["poslat"].astype(float)
-df["poslon"] = df["poslon"].astype(float)
-
-# Normalize color
-def normalize(val, vmin, vmax):
-    return int(255 * (val - vmin) / (vmax - vmin)) if vmax > vmin else 128
-
-vmin, vmax = df[color_col].min(), df[color_col].max()
-df["color_value"] = df[color_col].apply(lambda x: normalize(x, vmin, vmax))
-df["color"] = df["color_value"].apply(lambda x: [x, 255 - x, 128])
-
-# Create a single trajectory as list of [lon, lat]
-path = df[["poslon", "poslat", "color"]].values.tolist()
-trajectory_df = pd.DataFrame([{"path": path}])  # One row with the full path
-
 import pydeck as pdk
 
+st.markdown("### 3D Trajectory Visualization (Basic)")
+
+# Clean up coordinates
+df_clean = df.dropna(subset=["poslat", "poslon"]).copy()
+df_clean["poslat"] = df_clean["poslat"].astype(float)
+df_clean["poslon"] = df_clean["poslon"].astype(float)
+
+# Create a single continuous path: list of [lon, lat]
+path_coords = df_clean[["poslon", "poslat"]].values.tolist()
+
+# Put that path into a DataFrame with a single row (what PathLayer expects)
+path_data = pd.DataFrame([{"path": path_coords}])
+
+# Define a basic PathLayer with fixed color
 layer = pdk.Layer(
     "PathLayer",
-    data=trajectory_df,
+    data=path_data,
     get_path="path",
-    get_color="path[0][2]",
-    width_scale=20,
+    get_color=[255, 140, 0],  # orange
+    width_scale=10,
     width_min_pixels=2,
     get_width=4,
-    pickable=False
+    opacity=0.8,
+    pickable=True
 )
 
-midpoint = [df["poslat"].mean(), df["poslon"].mean()]
-
+# Camera/view settings
+midpoint = [df_clean["poslat"].mean(), df_clean["poslon"].mean()]
 view_state = pdk.ViewState(
     latitude=midpoint[0],
     longitude=midpoint[1],
     zoom=6,
-    pitch=45
+    pitch=45,
 )
 
+# Display the map
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     map_style="mapbox://styles/mapbox/dark-v10"
 ))
+
 
 #######################################################
 #######################################################
