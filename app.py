@@ -101,62 +101,53 @@ import pydeck as pdk
 
 st.markdown("### 🌈 Colored Trajectory by Variable")
 
-# Variable to color by
+# Choose color dimension
 color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
 color_col = "alt" if "Altitude" in color_by else "pATR20_total"
 
-# Clean and prepare data
+# Clean and validate data
 df_line = df.dropna(subset=["poslat", "poslon", color_col]).copy()
 df_line = df_line.astype({ "poslat": float, "poslon": float, color_col: float })
 
-# Normalize color values
+# Normalize values
 def normalize(val, vmin, vmax):
     return int(255 * (val - vmin) / (vmax - vmin)) if vmax > vmin else 128
 
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 df_line["norm_val"] = df_line[color_col].apply(lambda x: normalize(x, vmin, vmax))
 
-# Create line segments with color per segment
+# Create line segments with R, G, B channels
 segments = []
 for i in range(len(df_line) - 1):
     start = df_line.iloc[i]
     end = df_line.iloc[i + 1]
-    color = [start["norm_val"], 255 - start["norm_val"], 150]  # customizable RGB
+    norm = start["norm_val"]
     segments.append({
         "start": [start["poslon"], start["poslat"]],
         "end": [end["poslon"], end["poslat"]],
-        "color": color
+        "r": norm,
+        "g": 255 - norm,
+        "b": 150
     })
 
 segment_df = pd.DataFrame(segments)
 
-# Define LineLayer
+# Define LineLayer using r/g/b columns
 layer = pdk.Layer(
     "LineLayer",
     data=segment_df,
     get_source_position="start",
     get_target_position="end",
-    get_color="color",
+    get_color="[r, g, b]",
     get_width=4,
     pickable=True,
     auto_highlight=True,
 )
 
-# View
+# View setup
 view_state = pdk.ViewState(
     latitude=df_line["poslat"].mean(),
-    longitude=df_line["poslon"].mean(),
-    zoom=6,
-    pitch=45
-)
-
-# Show chart
-st.pydeck_chart(pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip={"text": f"{color_by}: {{{color_col}}}"}
-))
+    longitude=df_line_
 
 #######################################################
 #######################################################
