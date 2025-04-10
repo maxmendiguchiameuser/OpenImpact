@@ -25,10 +25,10 @@ img_width_percent = 50
 
 #
 # Load the image from the .data folder
-image = Image.open(".data/image.jpg")
+#image = Image.open(".data/image.jpg")
 
 # Display the image scaled to 60% of the width
-st.image(image, use_column_width=False, width=int(st.get_option("browser.clientWidth") * 0.6))
+#st.image(image, use_column_width=False, width=int(st.get_option("browser.clientWidth") * 0.6))
 
 # Display the text below the image
 st.markdown("""
