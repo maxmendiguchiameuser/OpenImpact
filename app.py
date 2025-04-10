@@ -34,7 +34,7 @@ st.markdown("""
 
 # === Mission Section ===
 # Load image and encode in base64
-with open("data/image.png", "rb") as img_file:
+with open("data/image.jpg", "rb") as img_file:
     image_bytes = img_file.read()
 encoded_image = base64.b64encode(image_bytes).decode()
 
