@@ -22,7 +22,9 @@ img_width_percent = 50
 
 st.markdown(f"""
 <div style='text-align: center; padding: 2rem 0;'>
+
     <h2 style='color: white; font-size: 1.5rem; margin-bottom: 1.5rem;'>What is the purpose of this</h2>
+    
     <div style='padding: 2rem 0 1rem 0; border-bottom: 1px solid #444; display: inline-block; text-align: left;'>
         <div style='color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Our Mission</div>
         <h1 style='font-size: 3rem; font-weight: 300; margin-bottom: 1rem; color: white;'>
@@ -37,13 +39,15 @@ st.markdown(f"""
             </div>
         </div>
     </div>
-</div>
 
-<div style='margin-top: 4rem; color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Contributors</div>
-<h2 style='font-size: 1.6rem; font-weight: 300; color: white;'>
-    We are part of a multi-disciplinary network of organizations collaborating on contrail management.
-</h2>
+    <div style='margin-top: 4rem; color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Contributors</div>
+    <h2 style='font-size: 1.6rem; font-weight: 300; color: white; max-width: 800px; margin: 0 auto;'>
+        We are part of a multi-disciplinary network of organizations collaborating on contrail management.
+    </h2>
+
+</div>
 """, unsafe_allow_html=True)
+
 
 # === Load Trajectory Data ===
 @st.cache_data
