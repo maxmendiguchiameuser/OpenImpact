@@ -53,14 +53,13 @@ df = df.rename(columns={"lon": "Longitude", "lat": "Latitude", selected_var: "Va
 # Normalize values
 df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Display interactive map
 st.pydeck_chart(pdk.Deck(
     map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
         latitude=df["Latitude"].mean(),
         longitude=df["Longitude"].mean(),
         zoom=3,
-        pitch=0,
+        pitch=0
     ),
     layers=[
         pdk.Layer(
@@ -80,3 +79,4 @@ st.pydeck_chart(pdk.Deck(
         )
     ]
 ))
+
