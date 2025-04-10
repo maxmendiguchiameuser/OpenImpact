@@ -1,45 +1,51 @@
 import streamlit as st
 import xarray as xr
-import pandas as pd
 import pydeck as pdk
-import numpy as np
+import pandas as pd
 
-
-st.set_page_config(
-    page_title="Flight Climate Impact Dashboard",
-    layout="wide",
-)
-
-st.markdown("### Climate sensitivity [algorithmic climate change functions")
+st.set_page_config(page_title="Flight Climate Impact Dashboard", layout="wide")
+st.markdown("### Climate sensitivity [algorithmic climate change functions]")
 
 # Load NetCDF data
-nc_file = "data/env_processed_compressed.nc"
+nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
 ds = xr.open_dataset(nc_file, engine="netcdf4")
 
-# Select aCCF variables
-accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
+# List aCCF variables
+accf_vars = [var for var in ds.data_vars if var.lower().startswith("accf")]
+if not accf_vars:
+    st.error("No variables starting with 'aCCF' found in dataset.")
+    st.stop()
+
 selected_var = st.selectbox("Select aCCF variable", accf_vars)
 
-# Get available pressure levels from 'lev' (in hPa)
-if "lev" in ds.dims:
-    pressure_levels = ds["lev"].values
-    level_hpa = st.selectbox("Select pressure level (hPa)", pressure_levels)
-    var_data = ds[selected_var].sel(lev=level_hpa)
+# Select pressure level
+if "level" in ds.coords:
+    pressure_levels = ds["level"].values
+    level = st.selectbox("Select pressure level (hPa)", pressure_levels)
+    var_data = ds[selected_var].sel(level=level)
 else:
-    st.warning("No 'lev' dimension found in this dataset.")
+    st.warning("No 'level' coordinate found.")
     var_data = ds[selected_var]
-    
-# Flatten to DataFrame
+
+# Convert to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
-# Rename for PyDeck
-df = df.rename(columns={"lon": "Longitude", "lat": "Latitude", selected_var: "Value"})
+# Rename for PyDeck compatibility
+if "longitude" in df.columns and "latitude" in df.columns:
+    df = df.rename(columns={
+        "longitude": "Longitude",
+        "latitude": "Latitude",
+        selected_var: "Value"
+    })
+else:
+    st.error("Missing required 'latitude' and 'longitude' columns.")
+    st.stop()
 
-# Normalize values for better grid visibility
+# Normalize 'Value' column for consistent coloring
 df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Set the map style and initial view
+# Render map
 st.pydeck_chart(pdk.Deck(
     map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
@@ -66,3 +72,4 @@ st.pydeck_chart(pdk.Deck(
         )
     ]
 ))
+
