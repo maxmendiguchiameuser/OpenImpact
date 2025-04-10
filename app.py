@@ -99,105 +99,64 @@ with col2:
 #######################################################
 import pydeck as pdk
 
-st.markdown("### 3D Trajectory Visualization (Basic)")
+st.markdown("### 🌈 Colored Trajectory by Variable")
 
-# Clean up coordinates
-df_clean = df.dropna(subset=["poslat", "poslon"]).copy()
-df_clean["poslat"] = df_clean["poslat"].astype(float)
-df_clean["poslon"] = df_clean["poslon"].astype(float)
+# Variable to color by
+color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
+color_col = "alt" if "Altitude" in color_by else "pATR20_total"
 
-# Create a single continuous path: list of [lon, lat]
-path_coords = df_clean[["poslon", "poslat"]].values.tolist()
+# Clean and prepare data
+df_line = df.dropna(subset=["poslat", "poslon", color_col]).copy()
+df_line = df_line.astype({ "poslat": float, "poslon": float, color_col: float })
 
-# Put that path into a DataFrame with a single row (what PathLayer expects)
-path_data = pd.DataFrame([{"path": path_coords}])
+# Normalize color values
+def normalize(val, vmin, vmax):
+    return int(255 * (val - vmin) / (vmax - vmin)) if vmax > vmin else 128
 
-# Define a basic PathLayer with fixed color
+vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
+df_line["norm_val"] = df_line[color_col].apply(lambda x: normalize(x, vmin, vmax))
+
+# Create line segments with color per segment
+segments = []
+for i in range(len(df_line) - 1):
+    start = df_line.iloc[i]
+    end = df_line.iloc[i + 1]
+    color = [start["norm_val"], 255 - start["norm_val"], 150]  # customizable RGB
+    segments.append({
+        "start": [start["poslon"], start["poslat"]],
+        "end": [end["poslon"], end["poslat"]],
+        "color": color
+    })
+
+segment_df = pd.DataFrame(segments)
+
+# Define LineLayer
 layer = pdk.Layer(
-    "PathLayer",
-    data=path_data,
-    get_path="path",
-    get_color=[255, 140, 0],  # orange
-    width_scale=10,
-    width_min_pixels=2,
+    "LineLayer",
+    data=segment_df,
+    get_source_position="start",
+    get_target_position="end",
+    get_color="color",
     get_width=4,
-    opacity=0.8,
-    pickable=True
+    pickable=True,
+    auto_highlight=True,
 )
 
-# Camera/view settings
-midpoint = [df_clean["poslat"].mean(), df_clean["poslon"].mean()]
+# View
 view_state = pdk.ViewState(
-    latitude=midpoint[0],
-    longitude=midpoint[1],
+    latitude=df_line["poslat"].mean(),
+    longitude=df_line["poslon"].mean(),
     zoom=6,
-    pitch=45,
+    pitch=45
 )
 
-# Display the map
+# Show chart
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10"
-))
-
-
-#######################################################
-#######################################################
-import pydeck as pdk
-
-st.markdown("### ✈️ Animated Trajectory (TripsLayer)")
-
-# Ensure clean coordinates and time
-df_trips = df.dropna(subset=["poslat", "poslon", "sim_time"]).copy()
-df_trips["poslat"] = df_trips["poslat"].astype(float)
-df_trips["poslon"] = df_trips["poslon"].astype(float)
-
-# Convert sim_time to seconds (or ensure it's monotonic ISO)
-try:
-    df_trips["timestamp"] = pd.to_timedelta(df_trips["sim_time"]).dt.total_seconds()
-except:
-    st.error("Couldn't parse sim_time — make sure it's HH:MM:SS format.")
-    st.stop()
-
-# Build the path: [[lon, lat, timestamp], ...]
-trip_path = df_trips[["poslon", "poslat", "timestamp"]].values.tolist()
-
-# Package into single-row dataframe for TripsLayer
-trip_data = pd.DataFrame([{
-    "vendor": "FlightA",
-    "path": trip_path
-}])
-
-# Create TripsLayer
-trips_layer = pdk.Layer(
-    "TripsLayer",
-    trip_data,
-    get_path="path",
-    get_color=[253, 128, 93],
-    opacity=0.8,
-    width_min_pixels=4,
-    rounded=True,
-    trail_length=300,
-    current_time=df_trips["timestamp"].max(),  # full path visible at start
-)
-
-# View setup
-view_state = pdk.ViewState(
-    latitude=df_trips["poslat"].mean(),
-    longitude=df_trips["poslon"].mean(),
-    zoom=6,
-    pitch=45,
-)
-
-# Show deck
-st.pydeck_chart(pdk.Deck(
-    layers=[trips_layer],
-    initial_view_state=view_state,
     map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip={"text": "Animated trajectory (TripsLayer)"}
+    tooltip={"text": f"{color_by}: {{{color_col}}}"}
 ))
-
 
 #######################################################
 #######################################################
