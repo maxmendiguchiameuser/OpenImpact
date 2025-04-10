@@ -4,53 +4,36 @@ import pandas as pd
 import pydeck as pdk
 import numpy as np
 
-# Streamlit page setup
+
 st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
     layout="wide",
 )
 
-st.markdown("### Climate sensitivity [algorithmic climate change functions]")
+st.markdown("### Climate sensitivity [algorithmic climate change functions")
 
-nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
+# Load NetCDF data
+nc_file = "data/env_processed_compressed.nc"
 ds = xr.open_dataset(nc_file, engine="netcdf4")
 
-# Select aCCF variables
+# Filter variables starting with 'aCCF'
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
-selected_var = st.selectbox("Select aCCF variable", accf_vars)
+selected_var = st.selectbox("Select aCCF variable to visualize", accf_vars)
 
-# Handle pressure level selection
-if "level" in ds.dims:
-    pressure_levels = ds["level"].values
-    selected_level = st.selectbox("Select pressure level (hPa)", pressure_levels)
-    var_data = ds[selected_var].sel(level=selected_level)
-else:
-    st.warning("No 'level' dimension found in this dataset.")
-    var_data = ds[selected_var]
+# Pick one altitude level (e.g., the surface or lowest level)
+var_data = ds[selected_var].isel(lev=0)  # Choose first vertical level
 
-# Convert to DataFrame
+# Flatten to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
-# Rename for PyDeck compatibility
-df = df.rename(columns={
-    "longitude": "Longitude",
-    "latitude": "Latitude",
-    selected_var: "Value"
-})
+# Rename for PyDeck
+df = df.rename(columns={"lon": "Longitude", "lat": "Latitude", selected_var: "Value"})
 
-# Keep only needed columns and ensure types are serializable
-df = df[["Longitude", "Latitude", "Value"]].astype({
-    "Longitude": float,
-    "Latitude": float,
-    "Value": float
-})
+# Normalize values for better grid visibility
+df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Normalize value to [0, 1]
-val_min, val_max = df["Value"].min(), df["Value"].max()
-df["Value"] = (df["Value"] - val_min) / (val_max - val_min + 1e-10)  # avoid div by zero
-
-# Create pydeck chart
+# Set the map style and initial view
 st.pydeck_chart(pdk.Deck(
     map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
