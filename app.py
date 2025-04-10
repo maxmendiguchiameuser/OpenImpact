@@ -197,9 +197,6 @@ st.pydeck_chart(pdk.Deck(
     }
 ))
 
-...
-
-
 # === Developer Section ===
 st.markdown("### 👩‍💻 Acknowledgements & References")
 
