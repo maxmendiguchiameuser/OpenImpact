@@ -144,6 +144,64 @@ st.pydeck_chart(pdk.Deck(
 
 #######################################################
 #######################################################
+import pydeck as pdk
+
+st.markdown("### ✈️ Animated Trajectory (TripsLayer)")
+
+# Ensure clean coordinates and time
+df_trips = df.dropna(subset=["poslat", "poslon", "sim_time"]).copy()
+df_trips["poslat"] = df_trips["poslat"].astype(float)
+df_trips["poslon"] = df_trips["poslon"].astype(float)
+
+# Convert sim_time to seconds (or ensure it's monotonic ISO)
+try:
+    df_trips["timestamp"] = pd.to_timedelta(df_trips["sim_time"]).dt.total_seconds()
+except:
+    st.error("Couldn't parse sim_time — make sure it's HH:MM:SS format.")
+    st.stop()
+
+# Build the path: [[lon, lat, timestamp], ...]
+trip_path = df_trips[["poslon", "poslat", "timestamp"]].values.tolist()
+
+# Package into single-row dataframe for TripsLayer
+trip_data = pd.DataFrame([{
+    "vendor": "FlightA",
+    "path": trip_path
+}])
+
+# Create TripsLayer
+trips_layer = pdk.Layer(
+    "TripsLayer",
+    trip_data,
+    get_path="path",
+    get_color=[253, 128, 93],
+    opacity=0.8,
+    width_min_pixels=4,
+    rounded=True,
+    trail_length=300,
+    current_time=df_trips["timestamp"].max(),  # full path visible at start
+)
+
+# View setup
+view_state = pdk.ViewState(
+    latitude=df_trips["poslat"].mean(),
+    longitude=df_trips["poslon"].mean(),
+    zoom=6,
+    pitch=45,
+)
+
+# Show deck
+st.pydeck_chart(pdk.Deck(
+    layers=[trips_layer],
+    initial_view_state=view_state,
+    map_style="mapbox://styles/mapbox/dark-v10",
+    tooltip={"text": "Animated trajectory (TripsLayer)"}
+))
+
+
+#######################################################
+#######################################################
+
 # === Climate Impact Horizontal Stacked Bar (F-ATR) ===
 st.markdown("## 🔬 Species-Level Climate Impact")
 
