@@ -31,7 +31,7 @@ accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
 selected_var = st.selectbox("Select aCCF variable to visualize", accf_vars)
 
 # Pick one altitude level (e.g., the surface or lowest level)
-var_data = ds[selected_var].isel(lev=0)  # Choose first vertical level
+var_data = ds[selected_var].isel(level=0)  # Choose first vertical level
 
 # Flatten to DataFrame
 df = var_data.to_dataframe().reset_index()
