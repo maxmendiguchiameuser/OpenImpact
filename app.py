@@ -34,12 +34,12 @@ st.markdown("""
 
 # === Mission Section ===
 # Load image and encode in base64
-with open("data/image.png", "rb") as img_file:
+with open("data/image.jpg", "rb") as img_file:
     image_bytes = img_file.read()
 encoded_image = base64.b64encode(image_bytes).decode()
 
 # Image width scaling factor (adjust here as needed)
-img_width_percent = 70  # use values like 60, 80, 100
+img_width_percent = 50  # use values like 60, 80, 100
 
 # Mission HTML block
 st.markdown(f"""
