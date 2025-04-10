@@ -94,74 +94,75 @@ with col2:
     st.markdown("### Horizontal Path")
     st.map(df.rename(columns={"poslat": "latitude", "poslon": "longitude"}))
 
-# === Pydeck 3D Trajectory Map ===
+
+#######################################################
+#######################################################
+
 st.markdown("### 3D Trajectory Visualization")
 
-# Color toggle
 color_by = st.radio("Color trajectory by:", ["Altitude", "Speed (VTAS)", "Climate Impact (pATR20_total)"], horizontal=True)
 
-# Choose column and color scale based on toggle
+# Choose column and color scale
 if color_by == "Altitude":
     color_col = "alt"
     color_label = "Altitude (ft)"
-    color_range = [0, df["alt"].max()]
-    color_palette = [0, 255, 0]
 elif color_by == "Speed (VTAS)":
     color_col = "VTAS"
     color_label = "Speed (VTAS)"
-    color_range = [0, df["VTAS"].max()]
-    color_palette = [0, 150, 255]
-else:
+elif color_by == "Climate Impact (pATR20_total)":
     color_col = "pATR20_total"
-    color_label = "Climate Impact"
-    color_range = [0, df["pATR20_total"].max()]
-    color_palette = [255, 50, 50]
+    color_label = "Climate Impact (K)"
+else:
+    color_col = "alt"
+    color_label = "Value"
 
-# Normalize color to RGB intensity
-def normalize(val, min_val, max_val):
-    if max_val - min_val == 0:
-        return 0
-    return int(255 * (val - min_val) / (max_val - min_val))
+# Ensure clean numeric data
+df = df.dropna(subset=["poslat", "poslon", color_col])
+df["poslat"] = df["poslat"].astype(float)
+df["poslon"] = df["poslon"].astype(float)
 
-df["color_value"] = df[color_col].apply(lambda x: normalize(x, color_range[0], color_range[1]))
+# Normalize color
+def normalize(val, vmin, vmax):
+    return int(255 * (val - vmin) / (vmax - vmin)) if vmax > vmin else 128
 
-# Create RGB array for pydeck
-df["color"] = df["color_value"].apply(lambda x: [x, 255 - x, 128])  # adjustable scheme
+vmin, vmax = df[color_col].min(), df[color_col].max()
+df["color_value"] = df[color_col].apply(lambda x: normalize(x, vmin, vmax))
+df["color"] = df["color_value"].apply(lambda x: [x, 255 - x, 128])
 
-# Define pydeck layer
+# Create a single trajectory as list of [lon, lat]
+path = df[["poslon", "poslat", "color"]].values.tolist()
+trajectory_df = pd.DataFrame([{"path": path}])  # One row with the full path
+
 import pydeck as pdk
 
 layer = pdk.Layer(
     "PathLayer",
-    data=df,
-    get_path="[['poslon', 'poslat']]",
-    get_color="color",
-    width_scale=10,
+    data=trajectory_df,
+    get_path="path",
+    get_color="path[0][2]",
+    width_scale=20,
     width_min_pixels=2,
-    get_width=5,
-    opacity=0.8,
-    pickable=True
+    get_width=4,
+    pickable=False
 )
 
-# View setup
 midpoint = [df["poslat"].mean(), df["poslon"].mean()]
+
 view_state = pdk.ViewState(
     latitude=midpoint[0],
     longitude=midpoint[1],
     zoom=6,
-    pitch=45,
+    pitch=45
 )
 
-# Show map
 st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/dark-v10",
-    initial_view_state=view_state,
     layers=[layer],
-    tooltip={"text": f"{color_label}: {{{color_col}}}"}
+    initial_view_state=view_state,
+    map_style="mapbox://styles/mapbox/dark-v10"
 ))
 
-
-
+#######################################################
+#######################################################
 # === Climate Impact Horizontal Stacked Bar (F-ATR) ===
 st.markdown("## 🔬 Species-Level Climate Impact")
 
