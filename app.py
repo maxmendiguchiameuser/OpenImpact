@@ -160,38 +160,43 @@ left, right = st.columns([1, 5])
 
 # === Plotly color legend ===
 with left:
-    # Create a vertical colorbar using dummy scatter points
-    gradient = [vmin + (vmax - vmin) * i / 100 for i in range(101)]
-    fig = go.Figure(go.Scatter(
+    import numpy as np
+
+    # Create a vertical gradient with 101 values between vmin and vmax
+    gradient = np.linspace(vmin, vmax, 101)
+    colorbar_fig = go.Figure(go.Scatter(
         x=[0]*len(gradient),
-        y=list(range(len(gradient))),
+        y=gradient,
         mode='markers',
         marker=dict(
             color=gradient,
-            colorscale="Viridis",
-            size=16,
+            colorscale='Viridis',
+            size=20,
             colorbar=dict(
                 title=color_by,
                 titleside="right",
                 thickness=20,
-                tickvals=[0, 100],
-                ticktext=[f"{vmin:.2f}", f"{vmax:.2f}"]
+                tickvals=[vmin, vmax],
+                ticktext=[f"{vmin:.2f}", f"{vmax:.2f}"],
+                ticks="outside"
             ),
             showscale=True
-        )
+        ),
+        showlegend=False
     ))
 
-    fig.update_layout(
+    colorbar_fig.update_layout(
         width=100,
         height=400,
-        xaxis=dict(showticklabels=False),
-        yaxis=dict(showticklabels=False),
         margin=dict(l=0, r=0, t=0, b=0),
+        xaxis=dict(showticklabels=False, visible=False),
+        yaxis=dict(title='', tickfont=dict(color='white')),
         paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
+        plot_bgcolor="rgba(0,0,0,0)",
     )
 
-    st.plotly_chart(fig)
+    st.plotly_chart(colorbar_fig)
+
 
 
 # === Pydeck chart ===
