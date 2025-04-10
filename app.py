@@ -113,7 +113,7 @@ df_line = df_line.astype({ "poslat": float, "poslon": float, "alt": float, color
 # Normalize and apply Viridis colormap
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
-cmap = cm.get_cmap("Spectral")
+cmap = cm.get_cmap("viridis")
 
 segments = []
 for i in range(len(df_line) - 1):
@@ -182,9 +182,9 @@ colorbar_html = f"""
 ">
     <div>{vmax_scaled:.2f}</div>
     <div style="
-        background: linear-gradient(to top, #9e0142, #d53e4f, #f46d43, #fdae61, #fee08b, #e6f598, #abdda4, #66c2a5, #3288bd, #5e4fa2); */
+        background: linear-gradient(to top, #440154, #31688e, #35b779, #fde725);
         width: 10px;
-        height: 260px;
+        height: 360px;
         border-radius: 5px;
         box-shadow: 0 0 4px rgba(0,0,0,0.3);
         margin: 4px 0;
