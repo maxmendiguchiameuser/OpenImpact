@@ -8,6 +8,7 @@ import matplotlib.colors as mcolors
 import plotly.graph_objects as go
 import math
 import numpy as np
+from PIL import Image
 
 st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
@@ -20,33 +21,25 @@ with open("data/image.jpg", "rb") as img_file:
 encoded_image = base64.b64encode(image_bytes).decode()
 img_width_percent = 50
 
-st.markdown(f"""
-<div style='text-align: center; padding: 2rem 0;'>
 
-    <h2 style='color: white; font-size: 1.5rem; margin-bottom: 1.5rem;'>What is the purpose of this</h2>
-    
-    <div style='padding: 2rem 0 1rem 0; border-bottom: 1px solid #444; display: inline-block; text-align: left;'>
-        <div style='color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Our Mission</div>
-        <h1 style='font-size: 3rem; font-weight: 300; margin-bottom: 1rem; color: white;'>
-            Turning contrail research into <br> climate action.
-        </h1>
-        <div style='display: flex; justify-content: center;'>
-            <img src="/static/images/contrail-impact.png" alt="Contrail climate impact" style="max-width: 100%;">
-        </div>
-        <div style='display: flex; justify-content: flex-end;'>
-            <div style='border-left: 3px solid #f75e00; padding-left: 1rem; max-width: 400px; font-size: 1rem; color: #ccc;'>
-                We, along with a broad range of collaborators, are working to build the most up-to-date science into contrail management solutions that can be used by the aviation industry to significantly—and immediately—reduce their climate impact.
-            </div>
-        </div>
-    </div>
 
-    <div style='margin-top: 4rem; color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Contributors</div>
-    <h2 style='font-size: 1.6rem; font-weight: 300; color: white; max-width: 800px; margin: 0 auto;'>
-        We are part of a multi-disciplinary network of organizations collaborating on contrail management.
-    </h2>
+#
+# Load the image from the .data folder
+image = Image.open(".data/your-image.png")
 
-</div>
-""", unsafe_allow_html=True)
+# Display the image scaled to 60% of the width
+st.image(image, use_column_width=False, width=int(st.get_option("browser.clientWidth") * 0.6))
+
+# Display the text below the image
+st.markdown("""
+### Contrail Climate Impact Visualization
+
+This page visualizes the relative climate impact of aircraft contrails compared to CO₂ for a large set of European flights.  
+The climate effect is expressed as **Effective Radiative Forcing (ERF)** in *mW/m²*.  
+Each dot represents a flight; **blue means negative (cooling)**, **red means positive (warming)**.  
+This tool helps identify patterns in the formation and warming impact of persistent contrails.
+""")
+
 
 
 # === Load Trajectory Data ===
