@@ -13,7 +13,7 @@ st.set_page_config(
 st.markdown("### Climate sensitivity [algorithmic climate change functions]")
 
 # Path to NetCDF file
-nc_file = "data/env_processed.nc"
+nc_file = "data/env_processed_compressed.nc"
 
 # Load dataset
 ds = xr.open_dataset(nc_file)
