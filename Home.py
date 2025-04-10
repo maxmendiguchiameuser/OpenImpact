@@ -12,11 +12,8 @@ st.set_page_config(
 
 st.markdown("### Climate sensitivity [algorithmic climate change functions]")
 
-# Path to NetCDF file
-nc_file = "data/env_processed_compressed.nc"
-
-# Load dataset
-ds = xr.open_dataset(nc_file)
+nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
+ds = xr.open_dataset(nc_file, engine="netcdf4")
 
 # Select aCCF variables
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
