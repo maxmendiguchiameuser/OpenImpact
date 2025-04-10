@@ -175,7 +175,7 @@ st.markdown(colorbar_html, unsafe_allow_html=True)
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10",
+    map_style="mapbox://styles/mapbox/light-v10",
     tooltip={
         "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
         "style": {"color": "white"}
