@@ -6,7 +6,7 @@ import pydeck as pdk
 # Load NetCDF file
 @st.cache_data
 def load_data():
-    ds = xr.open_dataset(nc_file, engine="h5netcdf")
+    ds = xr.open_dataset(nc_file, engine="netCDF4")
     return ds
 
 ds = load_data()
