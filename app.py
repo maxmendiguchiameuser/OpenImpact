@@ -147,7 +147,18 @@ layer = pdk.Layer(
 # View setup
 view_state = pdk.ViewState(
     latitude=df_line["poslat"].mean(),
-    longitude=df_line_
+    longitude=df_line["poslon"].mean(),
+    zoom=6,
+    pitch=45
+)
+
+# Render the deck
+st.pydeck_chart(pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    map_style="mapbox://styles/mapbox/dark-v10"
+))
+
 
 #######################################################
 #######################################################
