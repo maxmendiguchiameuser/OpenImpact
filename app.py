@@ -31,7 +31,7 @@ st.markdown(f"""
             Turning contrail research into <br> climate action.
         </h1>
         <div style='display: flex; justify-content: center;'>
-            <img src='data:image/png;base64,{encoded_image}' style='width: {img_width_percent}%; border-radius: 4px; margin: 2rem 0;' />
+            <img src="/static/images/contrail-impact.png" alt="Contrail climate impact" style="max-width: 100%;">
         </div>
         <div style='display: flex; justify-content: flex-end;'>
             <div style='border-left: 3px solid #f75e00; padding-left: 1rem; max-width: 400px; font-size: 1rem; color: #ccc;'>
