@@ -98,8 +98,9 @@ with col2:
 #######################################################
 #######################################################
 import pydeck as pdk
+import plotly.graph_objects as go
 
-st.markdown("### 🛰️ 3D Trajectory Visualization with Tooltip")
+st.markdown("### 🛰️ 3D Trajectory Visualization with Tooltip & Legend")
 
 # Choose coloring mode
 color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
@@ -116,7 +117,7 @@ def normalize(val, vmin, vmax):
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 df_line["norm_val"] = df_line[color_col].apply(lambda x: normalize(x, vmin, vmax))
 
-# Create line segments with z and tooltip info
+# Create segments
 segments = []
 for i in range(len(df_line) - 1):
     start = df_line.iloc[i]
@@ -135,7 +136,7 @@ for i in range(len(df_line) - 1):
 
 segment_df = pd.DataFrame(segments)
 
-# Define the 3D LineLayer with tooltip support
+# Define pydeck layer
 layer = pdk.Layer(
     "LineLayer",
     data=segment_df,
@@ -147,7 +148,6 @@ layer = pdk.Layer(
     auto_highlight=True,
 )
 
-# Camera setup
 view_state = pdk.ViewState(
     latitude=df_line["poslat"].mean(),
     longitude=df_line["poslon"].mean(),
@@ -155,16 +155,49 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 
-# Deck with custom tooltip
-st.pydeck_chart(pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip={
-        "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
-        "style": {"color": "white"}
-    }
-))
+# Layout with legend and map side-by-side
+left, right = st.columns([1, 5])
+
+# === Plotly color legend ===
+with left:
+    fig = go.Figure()
+
+    fig.add_trace(go.Heatmap(
+        z=[[vmin], [vmax]],
+        colorscale="Viridis",
+        showscale=True,
+        colorbar=dict(
+            tickvals=[vmin, vmax],
+            ticktext=[f"{vmin:.1f}", f"{vmax:.1f}"],
+            thickness=20,
+            title=color_by,
+            titleside="right"
+        )
+    ))
+
+    fig.update_layout(
+        width=100,
+        height=400,
+        xaxis=dict(showticklabels=False),
+        yaxis=dict(showticklabels=False),
+        margin=dict(l=0, r=0, t=0, b=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+
+    st.plotly_chart(fig)
+
+# === Pydeck chart ===
+with right:
+    st.pydeck_chart(pdk.Deck(
+        layers=[layer],
+        initial_view_state=view_state,
+        map_style="mapbox://styles/mapbox/dark-v10",
+        tooltip={
+            "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
+            "style": {"color": "white"}
+        }
+    ))
 
 
 #######################################################
