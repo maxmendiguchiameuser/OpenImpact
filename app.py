@@ -155,51 +155,48 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 ##############################################
-# === Custom HTML-based inline colorbar overlay ===
+# === Custom vertical HTML-based colorbar overlay ===
+
+# Determine scientific notation (for climate impact)
+if "Climate" in color_by:
+    exp = int(np.floor(np.log10(vmax))) if vmax > 0 else 0
+    scale_label = f"{color_by} (×10<sup>{exp}</sup>)"
+    scale_factor = 10**exp
+    vmin_scaled = vmin / scale_factor
+    vmax_scaled = vmax / scale_factor
+else:
+    scale_label = color_by
+    vmin_scaled = vmin
+    vmax_scaled = vmax
+
 colorbar_html = f"""
 <div style="
-    position: relative;
-    width: 100%;
-    height: 40px;
-    margin-top: 10px;
-    margin-bottom: -20px;
+    position: absolute;
+    top: 120px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    color: #ddd;
 ">
-  <div style="
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(to right, #440154, #31688e, #35b779, #fde725);
-      width: 300px;
-      height: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 4px rgba(0,0,0,0.3);
-  "></div>
-  <div style="
-      position: absolute;
-      left: calc(50% - 150px);
-      top: 16px;
-      font-size: 10px;
-      color: #aaa;
-  ">{vmin:.2f}</div>
-  <div style="
-      position: absolute;
-      right: calc(50% - 150px);
-      top: 16px;
-      font-size: 10px;
-      color: #aaa;
-  ">{vmax:.2f}</div>
-  <div style="
-      position: absolute;
-      left: 50%;
-      top: 16px;
-      transform: translateX(-50%);
-      font-size: 10px;
-      color: #ccc;
-  ">{color_by}</div>
+    <div>{vmax_scaled:.2f}</div>
+    <div style="
+        background: linear-gradient(to top, #440154, #31688e, #35b779, #fde725);
+        width: 10px;
+        height: 100px;
+        border-radius: 5px;
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        margin: 4px 0;
+    "></div>
+    <div>{vmin_scaled:.2f}</div>
+    <div style="margin-top: 4px;">{scale_label}</div>
 </div>
 """
 
 st.markdown(colorbar_html, unsafe_allow_html=True)
+
 ############################################
 
 # Deck with tooltip
