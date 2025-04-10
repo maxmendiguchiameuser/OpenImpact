@@ -155,20 +155,29 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 ##############################################
-# === Custom vertical HTML-based colorbar overlay ===
+# === Safe vertical HTML-based colorbar overlay ===
 
-# Determine scientific notation (for climate impact)
+import math
+
+# Default labels
+vmin_scaled, vmax_scaled = vmin, vmax
+scale_label = color_by
+
+# Smart scaling only for climate impact
 if "Climate" in color_by:
-    exp = int(np.floor(np.log10(vmax))) if vmax > 0 else 0
-    scale_label = f"{color_by} (×10<sup>{exp}</sup>)"
-    scale_factor = 10**exp
-    vmin_scaled = vmin / scale_factor
-    vmax_scaled = vmax / scale_factor
-else:
-    scale_label = color_by
-    vmin_scaled = vmin
-    vmax_scaled = vmax
+    try:
+        if vmax > 0:
+            exp = int(math.floor(math.log10(vmax)))
+            scale_factor = 10**exp
+            vmin_scaled = vmin / scale_factor
+            vmax_scaled = vmax / scale_factor
+            scale_label = f"{color_by} (×10<sup>{exp}</sup>)"
+        else:
+            scale_label = color_by
+    except Exception as e:
+        scale_label = color_by
 
+# Vertical HTML overlay
 colorbar_html = f"""
 <div style="
     position: absolute;
@@ -196,6 +205,7 @@ colorbar_html = f"""
 """
 
 st.markdown(colorbar_html, unsafe_allow_html=True)
+
 
 ############################################
 
