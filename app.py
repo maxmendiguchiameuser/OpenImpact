@@ -209,11 +209,14 @@ Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
 Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales hendrerit. 
 
 **Key Contributors:**
+
+- S. Dietm¨uller, S. Matthes, K. Dahlmann, H. Yamashita, A. Simorgh, and M. Soler et al., “A python library for computing individual and merged non-co2 algorithmic climate change functions: Climaccf v1.0,” Geoscientific
+  Model Development, no. 16, pp. 4405–4425, August 2023.
+- Copernicus Climate Change Service (C3S). (2017). ERA5: Fifth generation of ECMWF atmospheric reanalyses of the global climate. Copernicus Climate Data Store (CDS). https://cds.climate.copernicus.eu/cdsapp#!/home
+- Matthias Schäfer, Martin Strohmeier, Vincent Lenders, Ivan Martinovic and Matthias Wilhelm."Bringing Up OpenSky: A Large-scale ADS-B Sensor Network for Research".
+  In Proceedings of the 13th IEEE/ACM International Symposium on Information Processing in Sensor Networks (IPSN), pages 83-94, April 2014.
+- Olive, X. (2019). traffic, a toolbox for processing and analysing air traffic data. Journal of Open Source Software, 4, 1518. https://doi.org/10.21105/joss.01518
 - Dr. Junzi Sun (FastMeteo)
-- Gabriel Jarry (Acropole)
-- DLR Team (CLIMaCCF)
-- ECMWF (ERA5)
-- OpenSky Network (ADS-B data)
 
 **Selected References on Non-CO₂ Effects of Aviation:**
 1. Lee et al. (2021) – The contribution of global aviation to climate change.
