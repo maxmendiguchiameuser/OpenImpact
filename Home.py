@@ -1,17 +1,16 @@
-st.set_page_config(
-    page_title="Flight Climate Impact Dashboard",
-    layout="wide",
-)
-
-
-
-st.markdown("### Climate sensitivity [algorithmic climate change functions")
-
 import streamlit as st
 import xarray as xr
 import pandas as pd
 import pydeck as pdk
 import numpy as np
+
+
+st.set_page_config(
+    page_title="Flight Climate Impact Dashboard",
+    layout="wide",
+)
+
+st.markdown("### Climate sensitivity [algorithmic climate change functions")
 
 # Load NetCDF data
 nc_file = "data/env_processed_compressed.nc"
