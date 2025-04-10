@@ -14,7 +14,7 @@ st.markdown("### Climate sensitivity [algorithmic climate change functions")
 
 # Load NetCDF data
 nc_file = "data/env_processed_compressed.nc"
-ds = xr.open_dataset(nc_file)
+ds = xr.open_dataset(nc_file, engine="netcdf4")
 
 # Filter variables starting with 'aCCF'
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
