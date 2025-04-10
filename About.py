@@ -87,11 +87,6 @@ layer = pdk.Layer(
     ]
 )
 
-tooltip = pdk.Tooltip(
-    html="Lat: {Latitude} <br> Lon: {Longitude} <br> Value: {Value}",
-    style={"backgroundColor": "steelblue", "color": "white"}
-)
-
 deck = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
