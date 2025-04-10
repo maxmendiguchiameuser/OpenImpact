@@ -21,16 +21,17 @@ with open("data/image.jpg", "rb") as img_file:
 encoded_image = base64.b64encode(image_bytes).decode()
 img_width_percent = 50
 
+# Display the image using HTML with base64
+st.markdown(
+    f"""
+    <div style="text-align: center;">
+        <img src="data:image/jpeg;base64,{encoded_image}" style="width:{img_width_percent}%;"/>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-
-#
-# Load the image from the .data folder
-#image = Image.open(".data/image.jpg")
-
-# Display the image scaled to 60% of the width
-#st.image(image, use_column_width=False, width=int(st.get_option("browser.clientWidth") * 0.6))
-
-# Display the text below the image
+# Display the explanation text below
 st.markdown("""
 ### Contrail Climate Impact Visualization
 
@@ -39,6 +40,7 @@ The climate effect is expressed as **Effective Radiative Forcing (ERF)** in *mW/
 Each dot represents a flight; **blue means negative (cooling)**, **red means positive (warming)**.  
 This tool helps identify patterns in the formation and warming impact of persistent contrails.
 """)
+
 
 
 
