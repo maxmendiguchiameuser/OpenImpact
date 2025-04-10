@@ -24,7 +24,7 @@ st.text(f"Files in 'data/' directory: {os.listdir('./data') if os.path.exists('.
 
 # Load NetCDF data
 nc_file = "/mount/src/openimpact/data/env_processed_compressed.nc"
-ds = xr.open_dataset(nc_file, engine="netCDF4")
+ds = xr.open_dataset(nc_file, engine="netcdf4")
 
 # Filter variables starting with 'aCCF'
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
