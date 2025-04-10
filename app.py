@@ -78,13 +78,13 @@ st.markdown("## 📊 Flight Overview")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("### Altitude Profile")
+    st.markdown("### Vertical Profile")
     fig_alt = px.line(df, x="sim_time", y="alt", title=None,
                       labels={"sim_time": "Simulation Time", "alt": "Altitude (ft)"})
     fig_alt.update_layout(
-        paper_bgcolor='#1e1e1e',
-        plot_bgcolor='#1e1e1e',
-        font_color='#f0f0f0',
+        paper_bgcolor='#595959',
+        plot_bgcolor='#595959',
+        font_color='#f2f2f2',
         xaxis=dict(color='#f0f0f0'),
         yaxis=dict(color='#f0f0f0'),
     )
@@ -94,8 +94,81 @@ with col2:
     st.markdown("### Horizontal Path")
     st.map(df.rename(columns={"poslat": "latitude", "poslon": "longitude"}))
 
+# === Climate Impact Horizontal Stacked Bar (F-ATR) ===
+st.markdown("## 🔬 Species-Level Climate Impact")
+
+# Select F-ATR horizon
+horizon = st.selectbox("Select climate metric horizon", ["F-ATR20", "F-ATR50", "F-ATR100"])
+
+# Log scale toggle
+log_scale = st.checkbox("Log scale", value=False)
+
+# Conversion factors from image table
+conversion_factors = {
+    "F-ATR20": {"CO₂": 9.4, "NOₓ": 14.5 + 10.8 + 10.8, "H₂O": 14.5, "Contrail": 13.6},
+    "F-ATR50": {"CO₂": 44.0, "NOₓ": 34.1 + 42.5 + 42.5, "H₂O": 34.1, "Contrail": 30.16},
+    "F-ATR100": {"CO₂": 125.0, "NOₓ": 58.3 + 98.2 + 98.2, "H₂O": 58.3, "Contrail": 48.9}
+}
+
+# Base p-ATR20 totals
+impact_totals = {
+    "CO₂": df["pATR20_CO2"].sum(),
+    "NOₓ": df["pATR20_NOx"].sum(),
+    "H₂O": df["pATR20_H2O"].sum(),
+    "Contrail": df["pATR20_CiC"].sum()
+}
+
+# Apply conversion
+scaled = {
+    species: impact_totals[species] * conversion_factors[horizon][species]
+    for species in impact_totals
+}
+
+# Prepare for horizontal stacked bar
+import plotly.graph_objects as go
+
+species = list(scaled.keys())
+values = list(scaled.values())
+colors = ['#440154', '#31688e', '#35b779', '#fde725']  # Viridis
+
+fig = go.Figure()
+
+# Accumulate bars in horizontal stacked layout
+x_offset = 0
+for sp, val, col in zip(species, values, colors):
+    fig.add_trace(go.Bar(
+        name=sp,
+        y=["Climate Impact [K]"],
+        x=[val],
+        orientation='h',
+        marker_color=col,
+        text=f"{val:.2e} K",
+        textposition='inside' if not log_scale else 'auto',
+        hovertemplate=f"{sp}: {{x:.2e}} K<br>"
+    ))
+    x_offset += val
+
+# Layout adjustments
+fig.update_layout(
+    barmode='stack',
+    title=f"Effective Climate Impact by Species ({horizon})",
+    xaxis_title="Kelvin (cumulative)",
+    yaxis=dict(showticklabels=True),
+    plot_bgcolor="#1e1e1e",
+    paper_bgcolor="#1e1e1e",
+    font=dict(color="white")
+)
+
+# Log scale toggle
+if log_scale:
+    fig.update_xaxes(type="log")
+
+# Show chart
+st.plotly_chart(fig, use_container_width=True)
+
+
 # === Climate Metrics ===
-st.markdown("## 🌍 Climate Impact Summary")
+st.markdown("## 🌍 Climate Impact Estimation")
 
 c1, c2 = st.columns(2)
 c1.metric("Total pATR20 (non-CO₂)", f"{df['pATR20_total'].sum():.2e}")
