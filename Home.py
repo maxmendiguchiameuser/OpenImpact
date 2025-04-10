@@ -11,7 +11,7 @@ nc_file = "data/env_processed_compressed.nc"  # Adjust if necessary
 ds = xr.open_dataset(nc_file, engine="netcdf4")
 
 # List aCCF variables
-accf_vars = [var for var in ds.data_vars if var.lower().startswith("accf")]
+accf_vars = [var for var in ds.data_vars if var.lower().startswith("aCCF")]
 if not accf_vars:
     st.error("No variables starting with 'aCCF' found in dataset.")
     st.stop()
