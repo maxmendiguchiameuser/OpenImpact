@@ -154,6 +154,47 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 
+# === Add vertical colorbar ===
+vmin_scaled, vmax_scaled = vmin, vmax
+scale_label = color_by
+if "Climate" in color_by:
+    try:
+        if vmax > 0:
+            exp = int(math.floor(math.log10(vmax)))
+            scale_factor = 10 ** exp
+            vmin_scaled = vmin / scale_factor
+            vmax_scaled = vmax / scale_factor
+            scale_label = f"{color_by} (×10<sup>{exp}</sup>)"
+    except Exception:
+        scale_label = color_by
+
+colorbar_html = f"""
+<div style="
+    position: absolute;
+    top: 120px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 10px;
+    color: #ddd;
+">
+    <div>{vmax_scaled:.2f}</div>
+    <div style="
+        background: linear-gradient(to top, #440154, #31688e, #35b779, #fde725);
+        width: 10px;
+        height: 360px;
+        border-radius: 5px;
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+        margin: 4px 0;
+    "></div>
+    <div>{vmin_scaled:.2f}</div>
+    <div style="margin-top: 4px;">{scale_label}</div>
+</div>
+"""
+st.markdown(colorbar_html, unsafe_allow_html=True)
+
 # Deck with tooltip
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
