@@ -16,13 +16,26 @@ st.markdown("### Climate sensitivity [algorithmic climate change functions")
 nc_file = "data/env_processed_compressed.nc"
 ds = xr.open_dataset(nc_file, engine="netcdf4")
 
-# Filter variables starting with 'aCCF'
+import xarray as xr
+import streamlit as st
+
+# Load netCDF file
+nc_file = "data/env_processed.nc"
+ds = xr.open_dataset(nc_file)
+
+# Select aCCF variables
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
-selected_var = st.selectbox("Select aCCF variable to visualize", accf_vars)
+selected_var = st.selectbox("Select aCCF variable", accf_vars)
 
-# Pick one altitude level (e.g., the surface or lowest level)
-var_data = ds[selected_var].isel(lev=0)  # Choose first vertical level
-
+# Get available pressure levels from 'lev' (in hPa)
+if "lev" in ds.dims:
+    pressure_levels = ds["lev"].values
+    level_hpa = st.selectbox("Select pressure level (hPa)", pressure_levels)
+    var_data = ds[selected_var].sel(lev=level_hpa)
+else:
+    st.warning("No 'lev' dimension found in this dataset.")
+    var_data = ds[selected_var]
+    
 # Flatten to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
