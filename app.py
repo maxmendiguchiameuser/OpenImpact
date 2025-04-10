@@ -234,6 +234,5 @@ import streamlit as st
 import pandas as pd
 
 df = pd.read_csv("data/test_trajectory.csv")
-styled_df = df.style.background_gradient(cmap='viridis')
-st.dataframe(styled_df)
+st.dataframe(df)
 
