@@ -234,4 +234,5 @@ import streamlit as st
 import pandas as pd
 
 df = pd.read_csv("data/test_trajectory.csv")
-st.dataframe(df)  # This creates a scrollable, interactive table
+styled_df = df.style.highlight_max(axis=0)
+st.dataframe(styled_df)
