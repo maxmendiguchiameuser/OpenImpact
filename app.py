@@ -99,40 +99,43 @@ with col2:
 #######################################################
 import pydeck as pdk
 
-st.markdown("### 🌈 Colored Trajectory by Variable")
+st.markdown("### 🛰️ 3D Trajectory Visualization with Tooltip")
 
-# Choose color dimension
+# Choose coloring mode
 color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
 color_col = "alt" if "Altitude" in color_by else "pATR20_total"
 
-# Clean and validate data
-df_line = df.dropna(subset=["poslat", "poslon", color_col]).copy()
-df_line = df_line.astype({ "poslat": float, "poslon": float, color_col: float })
+# Clean and ensure correct types
+df_line = df.dropna(subset=["poslat", "poslon", "alt", color_col]).copy()
+df_line = df_line.astype({ "poslat": float, "poslon": float, "alt": float, color_col: float })
 
-# Normalize values
+# Normalize for color
 def normalize(val, vmin, vmax):
     return int(255 * (val - vmin) / (vmax - vmin)) if vmax > vmin else 128
 
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 df_line["norm_val"] = df_line[color_col].apply(lambda x: normalize(x, vmin, vmax))
 
-# Create line segments with R, G, B channels
+# Create line segments with z and tooltip info
 segments = []
 for i in range(len(df_line) - 1):
     start = df_line.iloc[i]
     end = df_line.iloc[i + 1]
     norm = start["norm_val"]
     segments.append({
-        "start": [start["poslon"], start["poslat"]],
-        "end": [end["poslon"], end["poslat"]],
+        "start": [start["poslon"], start["poslat"], start["alt"]],
+        "end": [end["poslon"], end["poslat"], end["alt"]],
         "r": norm,
         "g": 255 - norm,
-        "b": 150
+        "b": 150,
+        "lat": start["poslat"],
+        "lon": start["poslon"],
+        "alt": start["alt"]
     })
 
 segment_df = pd.DataFrame(segments)
 
-# Define LineLayer using r/g/b columns
+# Define the 3D LineLayer with tooltip support
 layer = pdk.Layer(
     "LineLayer",
     data=segment_df,
@@ -144,19 +147,23 @@ layer = pdk.Layer(
     auto_highlight=True,
 )
 
-# View setup
+# Camera setup
 view_state = pdk.ViewState(
     latitude=df_line["poslat"].mean(),
     longitude=df_line["poslon"].mean(),
     zoom=6,
-    pitch=45
+    pitch=60,
 )
 
-# Render the deck
+# Deck with custom tooltip
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10"
+    map_style="mapbox://styles/mapbox/dark-v10",
+    tooltip={
+        "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
+        "style": {"color": "white"}
+    }
 ))
 
 
