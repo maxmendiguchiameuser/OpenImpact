@@ -1,3 +1,10 @@
+st.set_page_config(
+    page_title="Flight Climate Impact Dashboard",
+    layout="wide",
+)
+
+
+
 st.markdown("### Climate sensitivity [algorithmic climate change functions")
 
 import streamlit as st
