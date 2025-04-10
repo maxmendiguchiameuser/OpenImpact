@@ -38,8 +38,6 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
-
 
 <div style='margin-top: 4rem; color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Contributors</div>
 <h2 style='font-size: 1.6rem; font-weight: 300; color: white;'>
