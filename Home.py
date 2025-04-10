@@ -6,7 +6,7 @@ import pydeck as pdk
 # Load NetCDF file
 @st.cache_data
 def load_data():
-    ds = xr.open_dataset("env_processed_compressed.nc")
+    ds = xr.open_dataset("data/env_processed_compressed.nc")
     return ds
 
 ds = load_data()
