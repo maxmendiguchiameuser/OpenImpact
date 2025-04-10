@@ -5,11 +5,12 @@ import numpy as np
 import pydeck as pdk
 import os
 
+# Streamlit page setup
 st.set_page_config(page_title="aCCF Map Viewer", layout="wide")
 st.title("Flight Climate Impact Dashboard")
 st.markdown("#### Visualize atmospheric climate sensitivity data (aCCFs) from NetCDF")
 
-# Debug: File structure
+# Debug: Show working directory and files
 st.markdown("### Debug Info")
 st.text(f"Working directory: {os.getcwd()}")
 st.text(f"Files in './data': {os.listdir('./data') if os.path.exists('./data') else 'data folder not found'}")
@@ -21,12 +22,16 @@ nc_file = "/mount/src/openimpact/data/env_processed_compressed.nc"
 def load_dataset(path):
     return xr.open_dataset(path)
 
-ds = load_dataset(nc_file)
+try:
+    ds = load_dataset(nc_file)
+except FileNotFoundError:
+    st.error(f"NetCDF file not found at: {nc_file}")
+    st.stop()
 
-# Select variable
+# Select aCCF variable
 accf_vars = [v for v in ds.data_vars if v.startswith("aCCF")]
 if not accf_vars:
-    st.error("No aCCF variables found.")
+    st.error("No variables starting with 'aCCF' found in dataset.")
     st.stop()
 
 selected_var = st.selectbox("Select aCCF variable", accf_vars)
@@ -40,7 +45,7 @@ levels = ds["level"].values
 selected_level = st.selectbox("Select vertical level", levels)
 var_data = ds[selected_var].sel(level=selected_level)
 
-# Transform to DataFrame
+# Convert to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
@@ -50,17 +55,17 @@ df = df.rename(columns={
     selected_var: "Value"
 })
 
-# Normalize values
+# Normalize Value column
 df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Show preview and stats
+# Show preview and value stats
 st.markdown("### Sample of Transformed DataFrame")
 st.dataframe(df.head())
 
 st.markdown("### Value Distribution")
 st.write(df["Value"].describe())
 
-# Map settings
+# Heatmap controls
 st.markdown("### Heatmap Settings")
 radius = st.slider("Heatmap radius (pixels)", 10, 100, 30)
 aggregation = st.selectbox("Aggregation method", ["SUM", "MEAN"])
@@ -75,13 +80,12 @@ layer = pdk.Layer(
     aggregation=aggregation
 )
 
-# Tooltip (not shown by HeatmapLayer but kept for consistency)
-tooltip = pdk.Tooltip(
-    html="Lat: {Latitude} <br> Lon: {Longitude} <br> Value: {Value}",
-    style={"backgroundColor": "black", "color": "white"}
-)
+# Define tooltip as dictionary (NOT a class)
+tooltip = {
+    "text": "Lat: {Latitude}\nLon: {Longitude}\nValue: {Value:.2f}"
+}
 
-# Create the deck
+# Create and render deck
 view_state = pdk.ViewState(
     latitude=df["Latitude"].mean(),
     longitude=df["Longitude"].mean(),
@@ -96,6 +100,5 @@ deck = pdk.Deck(
     tooltip=tooltip
 )
 
-# Show map
 st.markdown("### aCCF Heatmap")
 st.pydeck_chart(deck)
