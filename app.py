@@ -1,14 +1,19 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import base64
 import pydeck as pdk
+
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+
 import plotly.graph_objects as go
+import plotly.express as px
+
 import math
 import numpy as np
 from PIL import Image
+
+
 
 st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
@@ -59,16 +64,36 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### Vertical Profile")
+    
+    # Create the figure
     fig_alt = px.line(df, x="sim_time", y="alt", title=None,
                       labels={"sim_time": "Simulation Time", "alt": "Altitude (ft)"})
+    
+    # Update layout with custom styling
     fig_alt.update_layout(
         paper_bgcolor='#595959',
         plot_bgcolor='#595959',
         font_color='#f2f2f2',
-        xaxis=dict(color='#f0f0f0'),
-        yaxis=dict(color='#f0f0f0'),
+        xaxis=dict(
+            color='#f0f0f0',
+            tickformat="%H:%M",  # format time as HH:MM if datetime
+            dtick=60000,         # 60000 ms = 1 minute, works for datetime x-axis
+            showgrid=True,
+            gridcolor='gray',
+            gridwidth=0.5,
+            tickangle=-45
+        ),
+        yaxis=dict(
+            color='#f0f0f0',
+            showgrid=True,
+            gridcolor='lightgray',
+            gridwidth=0.5,
+            griddash='dot'  # Dotted grid lines
+        )
     )
+    
     st.plotly_chart(fig_alt, use_container_width=True)
+
 
 with col2:
     st.markdown("### Horizontal Path")
