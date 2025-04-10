@@ -100,7 +100,7 @@ with col2:
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 
-st.markdown("### 🛨️ 3D Trajectory Visualization with Tooltip")
+st.markdown("### 🚨️ 3D Trajectory Visualization with Tooltip")
 
 # Choose coloring mode
 color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
@@ -205,3 +205,29 @@ st.pydeck_chart(pdk.Deck(
         "style": {"color": "white"}
     }
 ))
+
+# === Developer Section ===
+st.markdown("### 👩‍💻 Acknowledgements & References")
+
+st.markdown("""
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. 
+Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. 
+Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. 
+Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. 
+Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. 
+Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam sodales hendrerit. 
+
+**Key Contributors:**
+- Dr. Junzi Sun (FastMeteo)
+- Gabriel Jarry (Acropole)
+- DLR Team (CLIMaCCF)
+- ECMWF (ERA5)
+- OpenSky Network (ADS-B data)
+
+**Selected References on Non-CO₂ Effects of Aviation:**
+1. Lee et al. (2021) – The contribution of global aviation to climate change.
+2. Grewe et al. (2017) – Mitigating the climate impact from aviation NOₓ emissions.
+3. Matthes et al. (2021) – Potential climate impact reductions from optimized flight planning.
+4. Burkhardt & Kärcher (2011) – Global radiative forcing from contrail cirrus.
+5. Brasseur et al. (2016) – Impact of aviation on climate: FAATC White Paper.
+""")
