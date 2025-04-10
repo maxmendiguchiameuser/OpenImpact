@@ -87,11 +87,16 @@ layer = pdk.Layer(
     ]
 )
 
+tooltip = pdk.Tooltip(
+    html="Lat: {Latitude} <br> Lon: {Longitude} <br> Value: {Value}",
+    style={"backgroundColor": "steelblue", "color": "white"}
+)
+
 deck = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip={"text": "Lat: {Latitude}\nLon: {Longitude}\nValue: {Value:.2f}"}
+    tooltip=tooltip
 )
 
 st.pydeck_chart(deck)
