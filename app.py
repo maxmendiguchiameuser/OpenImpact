@@ -155,42 +155,6 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 
-import plotly.graph_objects as go
-import numpy as np
-
-# Horizontal colorbar figure
-st.markdown("#### Color Scale Legend")
-
-# Generate gradient values for the colorbar
-gradient = np.linspace(vmin, vmax, 100)
-
-fig = go.Figure(data=go.Heatmap(
-    z=[gradient],
-    colorscale="Viridis",
-    showscale=True,
-    colorbar=dict(
-        orientation='h',
-        thickness=20,
-        title=color_by,
-        tickvals=[vmin, vmax],
-        ticktext=[f"{vmin:.2f}", f"{vmax:.2f}"],
-        xanchor='center',
-        x=0.5
-    )
-))
-
-fig.update_layout(
-    margin=dict(l=40, r=40, t=20, b=20),
-    xaxis=dict(showticklabels=False),
-    yaxis=dict(showticklabels=False),
-    height=100,
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-
 # Deck with tooltip
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
