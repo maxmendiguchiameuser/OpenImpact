@@ -113,7 +113,7 @@ df_line = df_line.astype({ "poslat": float, "poslon": float, "alt": float, color
 # Normalize and apply Viridis colormap
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
-cmap = cm.get_cmap("viridis")
+cmap = cm.get_cmap("RdYlGn")
 
 segments = []
 for i in range(len(df_line) - 1):
