@@ -190,7 +190,7 @@ map_style_option = st.selectbox(
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_style=f"mapbox://styles/mapbox/{map_style_option}","mapbox://styles/mapbox/light-v10",  # changed from dark-v10 to light-v10 for a slightly lighter look
+    map_style=f"mapbox://styles/mapbox/{map_style_option}",
     tooltip={
         "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
         "style": {"color": "white"}
