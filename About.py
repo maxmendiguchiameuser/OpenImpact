@@ -1,82 +1,97 @@
 import streamlit as st
 import xarray as xr
 import pandas as pd
-import pydeck as pdk
 import numpy as np
+import pydeck as pdk
 import os
 
-st.set_page_config(
-    page_title="Flight Climate Impact Dashboard",
-    layout="wide",
-)
+st.set_page_config(page_title="aCCF Map Viewer", layout="wide")
+st.title("Flight Climate Impact Dashboard")
+st.markdown("#### Visualize atmospheric climate sensitivity data (aCCFs) from NetCDF")
 
-st.markdown("### Climate sensitivity [algorithmic climate change functions")
+# Debug: File structure
+st.markdown("### Debug Info")
+st.text(f"Working directory: {os.getcwd()}")
+st.text(f"Files in './data': {os.listdir('./data') if os.path.exists('./data') else 'data folder not found'}")
 
-# Debug file paths
-st.markdown("### Debugging File Paths")
-st.text(f"Current working directory: {os.getcwd()}")
-st.text(f"Files in current directory: {os.listdir('.')}")
-st.text(f"Files in 'data/' directory: {os.listdir('./data') if os.path.exists('./data') else 'data folder not found'}")
-
-# Load NetCDF data
+# Load NetCDF
 nc_file = "/mount/src/openimpact/data/env_processed_compressed.nc"
-ds = xr.open_dataset(nc_file, engine="netcdf4")  # <- using correct engine
 
-# Check required dimensions
-required_coords = ['latitude', 'longitude', 'level']
-for coord in required_coords:
-    if coord not in ds.coords and coord not in ds.dims:
-        st.error(f"Missing required coordinate/dimension: {coord}")
-        st.stop()
+@st.cache_data
+def load_dataset(path):
+    return xr.open_dataset(path)
 
-# Filter variables starting with 'aCCF'
-accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
+ds = load_dataset(nc_file)
+
+# Select variable
+accf_vars = [v for v in ds.data_vars if v.startswith("aCCF")]
 if not accf_vars:
-    st.error("No variables starting with 'aCCF' found in dataset.")
+    st.error("No aCCF variables found.")
     st.stop()
 
-selected_var = st.selectbox("Select aCCF variable to visualize", accf_vars)
+selected_var = st.selectbox("Select aCCF variable", accf_vars)
 
-# Select first level
-var_data = ds[selected_var].isel(level=0)
+# Select vertical level
+if "level" not in ds:
+    st.error("No 'level' dimension found in dataset.")
+    st.stop()
 
-# Rename dimensions to standard names for consistency
-var_data = var_data.rename({'latitude': 'lat', 'longitude': 'lon'})
+levels = ds["level"].values
+selected_level = st.selectbox("Select vertical level", levels)
+var_data = ds[selected_var].sel(level=selected_level)
 
-# Flatten to DataFrame
+# Transform to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
-# Rename for PyDeck
-df = df.rename(columns={"lon": "Longitude", "lat": "Latitude", selected_var: "Value"})
+df = df.rename(columns={
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    selected_var: "Value"
+})
 
-# Normalize values
+# Normalize values for better visual contrast
 df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-st.pydeck_chart(pdk.Deck(
-    map_style="mapbox://styles/mapbox/dark-v10",
-    initial_view_state=pdk.ViewState(
-        latitude=df["Latitude"].mean(),
-        longitude=df["Longitude"].mean(),
-        zoom=3,
-        pitch=0
-    ),
-    layers=[
-        pdk.Layer(
-            "ScreenGridLayer",
-            data=df,
-            pickable=True,
-            cell_size_pixels=10,
-            color_range=[
-                [255, 255, 204],
-                [161, 218, 180],
-                [65, 182, 196],
-                [44, 127, 184],
-                [37, 52, 148]
-            ],
-            get_position="[Longitude, Latitude]",
-            get_weight="Value",
-        )
-    ]
-))
+# Show preview
+st.markdown("### Sample of Transformed DataFrame")
+st.dataframe(df.head())
 
+# Show distribution
+st.markdown("### Value Distribution")
+st.write(df["Value"].describe())
+
+# PyDeck Map
+st.markdown("### Map Visualization")
+
+view_state = pdk.ViewState(
+    latitude=df["Latitude"].mean(),
+    longitude=df["Longitude"].mean(),
+    zoom=3,
+    pitch=0
+)
+
+layer = pdk.Layer(
+    "ScreenGridLayer",
+    data=df,
+    get_position=["Longitude", "Latitude"],
+    get_weight="Value",
+    pickable=True,
+    cell_size_pixels=10,
+    color_range=[
+        [255, 255, 204],
+        [161, 218, 180],
+        [65, 182, 196],
+        [44, 127, 184],
+        [37, 52, 148]
+    ]
+)
+
+deck = pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    map_style="mapbox://styles/mapbox/dark-v10",
+    tooltip={"text": "Lat: {Latitude}\nLon: {Longitude}\nValue: {Value:.2f}"}
+)
+
+st.pydeck_chart(deck)
