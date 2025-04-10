@@ -210,7 +210,7 @@ Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non d
 
 **Key Contributors:**
 
-- S. Dietm¨uller, S. Matthes, K. Dahlmann, H. Yamashita, A. Simorgh, and M. Soler et al., “A python library for computing individual and merged non-co2 algorithmic climate change functions: Climaccf v1.0,” Geoscientific
+- S. Dietmüller, S. Matthes, K. Dahlmann, H. Yamashita, A. Simorgh, and M. Soler et al., “A python library for computing individual and merged non-co2 algorithmic climate change functions: Climaccf v1.0,” Geoscientific
   Model Development, no. 16, pp. 4405–4425, August 2023.
 - Copernicus Climate Change Service (C3S). (2017). ERA5: Fifth generation of ECMWF atmospheric reanalyses of the global climate. Copernicus Climate Data Store (CDS). https://cds.climate.copernicus.eu/cdsapp#!/home
 - Matthias Schäfer, Martin Strohmeier, Vincent Lenders, Ivan Martinovic and Matthias Wilhelm."Bringing Up OpenSky: A Large-scale ADS-B Sensor Network for Research".
