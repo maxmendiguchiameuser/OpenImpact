@@ -172,15 +172,33 @@ colorbar_html = f"""
 st.markdown(colorbar_html, unsafe_allow_html=True)
 
 # Deck with tooltip
+map_style_option = st.selectbox(
+    "Map background style:",
+    options=[
+        "light-v10",
+        "streets-v12",
+        "outdoors-v12",
+        "navigation-day-v1",
+        "dark-v10",
+        "navigation-night-v1",
+        "satellite-streets-v12"
+    ],
+    index=0,
+    format_func=lambda x: x.replace("-v", " v").replace("streets", "Streets").title()
+)
+
 st.pydeck_chart(pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/light-v10",
+    map_style=f"mapbox://styles/mapbox/{map_style_option}","mapbox://styles/mapbox/light-v10",  # changed from dark-v10 to light-v10 for a slightly lighter look
     tooltip={
         "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
         "style": {"color": "white"}
     }
 ))
+
+...
+
 
 # === Developer Section ===
 st.markdown("### 👩‍💻 Acknowledgements & References")
