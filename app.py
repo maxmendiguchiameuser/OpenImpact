@@ -14,30 +14,6 @@ st.set_page_config(
     layout="wide",
 )
 
-# === Dark Theme Styling ===
-st.markdown("""
-    <style>
-        html, body, [class*="css"] {
-            font-family: 'Inter', sans-serif;
-            background-color: #1e1e1e;
-            color: #f0f0f0;
-        }
-        h1, h2, h3 {
-            color: #ffffff;
-        }
-        .block-container {
-            padding: 2rem 3rem;
-        }
-        .metric {
-            font-size: 1.5rem !important;
-            color: #ffffff;
-        }
-        .stMetric label {
-            color: #ffffff !important;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 # === Mission Section ===
 with open("data/image.jpg", "rb") as img_file:
     image_bytes = img_file.read()
