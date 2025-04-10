@@ -4,68 +4,42 @@ import pandas as pd
 import pydeck as pdk
 import numpy as np
 
-# Streamlit page configuration
 st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
     layout="wide",
 )
 
-st.markdown("### Climate Sensitivity (Algorithmic Climate Change Functions)")
+st.markdown("### Climate sensitivity [algorithmic climate change functions]")
 
-# Load NetCDF file
-nc_file = "data/env_processed_compressed.nc"
-try:
-    ds = xr.open_dataset(nc_file)  # Use default engine for better compatibility
-except Exception as e:
-    st.error(f"Failed to open NetCDF file: {e}")
-    st.stop()
+# Load NetCDF data
+nc_file = "data/env_processed.nc"
+ds = xr.open_dataset(nc_file)
 
-# Filter for variables starting with 'aCCF'
+# Select the first aCCF variable available
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
 if not accf_vars:
     st.warning("No aCCF variables found in the dataset.")
     st.stop()
 
-# Variable selector
-selected_var = st.selectbox("Select aCCF variable", accf_vars)
+selected_var = accf_vars[0]
 
-# Check if 'level' dimension exists for vertical selection
+# Extract first level if 'level' is present
 if "level" in ds.dims:
-    pressure_levels = ds["level"].values
-    selected_level = st.selectbox("Select pressure level (hPa)", pressure_levels)
-    var_data = ds[selected_var].sel(level=selected_level)
+    var_data = ds[selected_var].isel(level=0)
 else:
-    st.warning("No 'level' dimension found in this dataset.")
     var_data = ds[selected_var]
 
-# Convert to DataFrame and drop NaNs
+# Flatten to DataFrame
 df = var_data.to_dataframe().reset_index()
 df = df.dropna(subset=[selected_var])
 
-# Rename columns for pydeck
-df = df.rename(columns={
-    "longitude": "Longitude",
-    "latitude": "Latitude",
-    selected_var: "Value"
-})
+# Rename for PyDeck
+df = df.rename(columns={"longitude": "Longitude", "latitude": "Latitude", selected_var: "Value"})
 
-# Check required columns exist
-if not all(col in df.columns for col in ["Longitude", "Latitude", "Value"]):
-    st.error("Missing required columns in data.")
-    st.stop()
+# Normalize values for better grid visibility
+df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Ensure correct types
-df = df.astype({"Longitude": float, "Latitude": float, "Value": float})
-
-# Normalize value for color scaling
-min_val = df["Value"].min()
-max_val = df["Value"].max()
-if max_val - min_val == 0:
-    df["Value"] = 0  # Avoid division by zero
-else:
-    df["Value"] = (df["Value"] - min_val) / (max_val - min_val)
-
-# PyDeck Map Plot
+# Display map
 st.pydeck_chart(pdk.Deck(
     map_style="mapbox://styles/mapbox/dark-v10",
     initial_view_state=pdk.ViewState(
