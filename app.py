@@ -177,11 +177,11 @@ st.markdown(colorbar_html, unsafe_allow_html=True)
 map_style_option = st.selectbox(
     "Map background style:",
     options=[
+        "dark-v10",
         "light-v10",
         "streets-v12",
         "outdoors-v12",
         "navigation-day-v1",
-        "dark-v10",
         "navigation-night-v1",
         "satellite-streets-v12"
     ],
