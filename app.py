@@ -160,18 +160,24 @@ left, right = st.columns([1, 5])
 
 # === Plotly color legend ===
 with left:
-    fig = go.Figure()
-
-    fig.add_trace(go.Heatmap(
-        z=[[vmin], [vmax]],
-        colorscale="Viridis",
-        showscale=True,
-        colorbar=dict(
-            tickvals=[vmin, vmax],
-            ticktext=[f"{vmin:.1f}", f"{vmax:.1f}"],
-            thickness=20,
-            title=color_by,
-            titleside="right"
+    # Create a vertical colorbar using dummy scatter points
+    gradient = [vmin + (vmax - vmin) * i / 100 for i in range(101)]
+    fig = go.Figure(go.Scatter(
+        x=[0]*len(gradient),
+        y=list(range(len(gradient))),
+        mode='markers',
+        marker=dict(
+            color=gradient,
+            colorscale="Viridis",
+            size=16,
+            colorbar=dict(
+                title=color_by,
+                titleside="right",
+                thickness=20,
+                tickvals=[0, 100],
+                ticktext=[f"{vmin:.2f}", f"{vmax:.2f}"]
+            ),
+            showscale=True
         )
     ))
 
@@ -186,6 +192,7 @@ with left:
     )
 
     st.plotly_chart(fig)
+
 
 # === Pydeck chart ===
 with right:
