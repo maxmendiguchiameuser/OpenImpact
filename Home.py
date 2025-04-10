@@ -16,13 +16,6 @@ st.markdown("### Climate sensitivity [algorithmic climate change functions")
 nc_file = "data/env_processed_compressed.nc"
 ds = xr.open_dataset(nc_file, engine="netcdf4")
 
-import xarray as xr
-import streamlit as st
-
-# Load netCDF file
-nc_file = "data/env_processed.nc"
-ds = xr.open_dataset(nc_file)
-
 # Select aCCF variables
 accf_vars = [var for var in ds.data_vars if var.startswith("aCCF")]
 selected_var = st.selectbox("Select aCCF variable", accf_vars)
