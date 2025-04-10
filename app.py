@@ -227,3 +227,11 @@ Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non d
 4. Burkhardt & Kärcher (2011) – Global radiative forcing from contrail cirrus.
 5. Brasseur et al. (2016) – Impact of aviation on climate: FAATC White Paper.
 """)
+
+st.markdown("### View raw data")
+
+import streamlit as st
+import pandas as pd
+
+df = pd.read_csv("data/test_trajectory.csv")
+st.dataframe(df)  # This creates a scrollable, interactive table
