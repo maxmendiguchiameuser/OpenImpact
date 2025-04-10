@@ -6,6 +6,29 @@ st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
     layout="wide",
 )
+# === CONTRAILS-STYLE INTRO SECTION ===
+st.markdown("""
+<div style='padding: 2rem 0 1rem 0; border-bottom: 1px solid #444;'>
+    <div style='color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Our Mission</div>
+    <h1 style='font-size: 3rem; font-weight: 300; margin-bottom: 1rem; color: white;'>
+        Turning contrail research into <br> climate action.
+    </h1>
+    <img src='data:image/png;base64,{}' style='width: 100%; border-radius: 4px; margin: 2rem 0;' />
+    <div style='display: flex; justify-content: flex-end;'>
+        <div style='border-left: 3px solid #f75e00; padding-left: 1rem; max-width: 400px; font-size: 1rem; color: #ccc;'>
+            We, along with a broad range of collaborators, are working to build the most up-to-date science into contrail management solutions that can be used by the aviation industry to significantly—and immediately—reduce their climate impact.
+        </div>
+    </div>
+</div>
+
+<div style='margin-top: 4rem; color: #f75e00; font-size: 0.9rem; font-weight: 600;'>■ Contributors</div>
+<h2 style='font-size: 1.6rem; font-weight: 300; color: white;'>
+    We are part of a multi-disciplinary network of organizations collaborating on contrail management.
+</h2>
+""".format(
+    # embed the image as base64
+    __import__('base64').b64encode(open("data/image.png", "rb").read()).decode()
+), unsafe_allow_html=True)
 
 # CSS styling inspired by contrails.org
 st.markdown("""
