@@ -98,9 +98,8 @@ with col2:
 #######################################################
 #######################################################
 import pydeck as pdk
-import plotly.graph_objects as go
 
-st.markdown("### 🛰️ 3D Trajectory Visualization with Tooltip & Legend")
+st.markdown("### 🛰️ 3D Trajectory Visualization with Tooltip")
 
 # Choose coloring mode
 color_by = st.radio("Color trajectory by:", ["Altitude", "Climate Impact (pATR20_total)"], horizontal=True)
@@ -117,7 +116,7 @@ def normalize(val, vmin, vmax):
 vmin, vmax = df_line[color_col].min(), df_line[color_col].max()
 df_line["norm_val"] = df_line[color_col].apply(lambda x: normalize(x, vmin, vmax))
 
-# Create segments
+# Create line segments with z and tooltip info
 segments = []
 for i in range(len(df_line) - 1):
     start = df_line.iloc[i]
@@ -136,7 +135,7 @@ for i in range(len(df_line) - 1):
 
 segment_df = pd.DataFrame(segments)
 
-# Define pydeck layer
+# Define the 3D LineLayer with tooltip support
 layer = pdk.Layer(
     "LineLayer",
     data=segment_df,
@@ -148,6 +147,7 @@ layer = pdk.Layer(
     auto_highlight=True,
 )
 
+# Camera setup
 view_state = pdk.ViewState(
     latitude=df_line["poslat"].mean(),
     longitude=df_line["poslon"].mean(),
@@ -155,61 +155,16 @@ view_state = pdk.ViewState(
     pitch=60,
 )
 
-# Layout with legend and map side-by-side
-left, right = st.columns([1, 5])
-
-# === Plotly color legend ===
-with left:
-    import numpy as np
-
-    # Create a vertical gradient with 101 values between vmin and vmax
-    gradient = np.linspace(vmin, vmax, 101)
-    colorbar_fig = go.Figure(go.Scatter(
-        x=[0]*len(gradient),
-        y=gradient,
-        mode='markers',
-        marker=dict(
-            color=gradient,
-            colorscale='Viridis',
-            size=20,
-            colorbar=dict(
-                title=color_by,
-                titleside="right",
-                thickness=20,
-                tickvals=[vmin, vmax],
-                ticktext=[f"{vmin:.2f}", f"{vmax:.2f}"],
-                ticks="outside"
-            ),
-            showscale=True
-        ),
-        showlegend=False
-    ))
-
-    colorbar_fig.update_layout(
-        width=100,
-        height=400,
-        margin=dict(l=0, r=0, t=0, b=0),
-        xaxis=dict(showticklabels=False, visible=False),
-        yaxis=dict(title='', tickfont=dict(color='white')),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-    )
-
-    st.plotly_chart(colorbar_fig)
-
-
-
-# === Pydeck chart ===
-with right:
-    st.pydeck_chart(pdk.Deck(
-        layers=[layer],
-        initial_view_state=view_state,
-        map_style="mapbox://styles/mapbox/dark-v10",
-        tooltip={
-            "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
-            "style": {"color": "white"}
-        }
-    ))
+# Deck with tooltip
+st.pydeck_chart(pdk.Deck(
+    layers=[layer],
+    initial_view_state=view_state,
+    map_style="mapbox://styles/mapbox/dark-v10",
+    tooltip={
+        "html": "<b>lat:</b> {lat}<br><b>lon:</b> {lon}<br><b>alt:</b> {alt} ft",
+        "style": {"color": "white"}
+    }
+))
 
 
 #######################################################
