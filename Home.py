@@ -5,11 +5,6 @@ import pydeck as pdk
 import numpy as np
 import os
 
-st.markdown("### Debugging File Paths")
-st.text(f"Current working directory: {os.getcwd()}")
-st.text(f"Files in current directory: {os.listdir('.')}")
-st.text(f"Files in 'data/' directory: {os.listdir('./data') if os.path.exists('./data') else 'data folder not found'}")
-
 
 st.set_page_config(
     page_title="Flight Climate Impact Dashboard",
@@ -17,6 +12,14 @@ st.set_page_config(
 )
 
 st.markdown("### Climate sensitivity [algorithmic climate change functions")
+
+
+st.markdown("### Debugging File Paths")
+st.text(f"Current working directory: {os.getcwd()}")
+st.text(f"Files in current directory: {os.listdir('.')}")
+st.text(f"Files in 'data/' directory: {os.listdir('./data') if os.path.exists('./data') else 'data folder not found'}")
+
+
 
 # Load NetCDF data
 nc_file = "data/env_processed_compressed.nc"
