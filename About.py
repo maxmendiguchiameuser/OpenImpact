@@ -2,7 +2,8 @@ import streamlit as st
 import xarray as xr
 import pandas as pd
 import numpy as np
-import pydeck as pdk
+import folium
+from folium.plugins import HeatMap
 import os
 
 # Streamlit page setup
@@ -65,40 +66,19 @@ st.dataframe(df.head())
 st.markdown("### Value Distribution")
 st.write(df["Value"].describe())
 
-# Heatmap controls
+# Heatmap settings
 st.markdown("### Heatmap Settings")
 radius = st.slider("Heatmap radius (pixels)", 10, 100, 30)
-aggregation = st.selectbox("Aggregation method", ["SUM", "MEAN"])
 
-# Define HeatmapLayer
-layer = pdk.Layer(
-    "HeatmapLayer",
-    data=df,
-    get_position=["Longitude", "Latitude"],
-    get_weight="Value",
-    radiusPixels=radius,
-    aggregation=aggregation
-)
+# Create a Folium map centered on the mean latitude and longitude
+m = folium.Map(location=[df["Latitude"].mean(), df["Longitude"].mean()], zoom_start=3, control_scale=True)
 
-# Define tooltip as dictionary (NOT a class)
-tooltip = {
-    "text": "Lat: {Latitude}\nLon: {Longitude}\nValue: {Value:.2f}"
-}
+# Create heatmap data
+heat_data = [[row["Latitude"], row["Longitude"], row["Value"]] for index, row in df.iterrows()]
 
-# Create and render deck
-view_state = pdk.ViewState(
-    latitude=df["Latitude"].mean(),
-    longitude=df["Longitude"].mean(),
-    zoom=3,
-    pitch=0
-)
+# Add HeatMap layer to the map
+HeatMap(heat_data, radius=radius).add_to(m)
 
-deck = pdk.Deck(
-    layers=[layer],
-    initial_view_state=view_state,
-    map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip=tooltip
-)
-
+# Render the map in Streamlit
 st.markdown("### aCCF Heatmap")
-st.pydeck_chart(deck)
+folium_static(m)
