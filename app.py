@@ -216,7 +216,7 @@ Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non d
 - Matthias Schäfer, Martin Strohmeier, Vincent Lenders, Ivan Martinovic and Matthias Wilhelm."Bringing Up OpenSky: A Large-scale ADS-B Sensor Network for Research".
   In Proceedings of the 13th IEEE/ACM International Symposium on Information Processing in Sensor Networks (IPSN), pages 83-94, April 2014.
 - Olive, X. (2019). traffic, a toolbox for processing and analysing air traffic data. Journal of Open Source Software, 4, 1518. https://doi.org/10.21105/joss.01518
-- Dr. Junzi Sun (FastMeteo)
+- Sun, J., & Roosenbrand, E. (2023). Fast contrail estimation with OpenSky data. Journal of Open Aviation Science, 1(2). https://doi.org/10.59490/joas.2023.7264
 
 **Selected References on Non-CO₂ Effects of Aviation:**
 1. Lee et al. (2021) – The contribution of global aviation to climate change.
