@@ -50,20 +50,38 @@ df = df.rename(columns={
     selected_var: "Value"
 })
 
-# Normalize values for better visual contrast
+# Normalize values
 df["Value"] = (df["Value"] - df["Value"].min()) / (df["Value"].max() - df["Value"].min())
 
-# Show preview
+# Show preview and stats
 st.markdown("### Sample of Transformed DataFrame")
 st.dataframe(df.head())
 
-# Show distribution
 st.markdown("### Value Distribution")
 st.write(df["Value"].describe())
 
-# PyDeck Map
-st.markdown("### Map Visualization")
+# Map settings
+st.markdown("### Heatmap Settings")
+radius = st.slider("Heatmap radius (pixels)", 10, 100, 30)
+aggregation = st.selectbox("Aggregation method", ["SUM", "MEAN"])
 
+# Define HeatmapLayer
+layer = pdk.Layer(
+    "HeatmapLayer",
+    data=df,
+    get_position=["Longitude", "Latitude"],
+    get_weight="Value",
+    radiusPixels=radius,
+    aggregation=aggregation
+)
+
+# Tooltip (not shown by HeatmapLayer but kept for consistency)
+tooltip = pdk.Tooltip(
+    html="Lat: {Latitude} <br> Lon: {Longitude} <br> Value: {Value}",
+    style={"backgroundColor": "black", "color": "white"}
+)
+
+# Create the deck
 view_state = pdk.ViewState(
     latitude=df["Latitude"].mean(),
     longitude=df["Longitude"].mean(),
@@ -71,26 +89,13 @@ view_state = pdk.ViewState(
     pitch=0
 )
 
-layer = pdk.Layer(
-    "ScreenGridLayer",
-    data=df,
-    get_position=["Longitude", "Latitude"],
-    get_weight="Value",
-    pickable=True,
-    cell_size_pixels=10,
-    color_range=[
-        [255, 255, 204],
-        [161, 218, 180],
-        [65, 182, 196],
-        [44, 127, 184],
-        [37, 52, 148]
-    ]
-)
-
 deck = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     map_style="mapbox://styles/mapbox/dark-v10",
+    tooltip=tooltip
 )
 
+# Show map
+st.markdown("### aCCF Heatmap")
 st.pydeck_chart(deck)
