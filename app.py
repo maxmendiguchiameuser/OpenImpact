@@ -48,6 +48,12 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown(
+    ## Headline
+    ### Second headline
+    <h2 style='color: white; font-size: 1.5rem; margin-bottom: 1.5rem;'>What is the purpose of this</h2>
+)
+
 
 # === Load Trajectory Data ===
 @st.cache_data
