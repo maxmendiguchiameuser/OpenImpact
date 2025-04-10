@@ -91,7 +91,6 @@ deck = pdk.Deck(
     layers=[layer],
     initial_view_state=view_state,
     map_style="mapbox://styles/mapbox/dark-v10",
-    tooltip=tooltip
 )
 
 st.pydeck_chart(deck)
