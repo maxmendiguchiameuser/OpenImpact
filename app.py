@@ -194,7 +194,7 @@ colorbar_html = f"""
     <div style="
         background: linear-gradient(to top, #440154, #31688e, #35b779, #fde725);
         width: 10px;
-        height: 100px;
+        height: 200px;
         border-radius: 5px;
         box-shadow: 0 0 4px rgba(0,0,0,0.3);
         margin: 4px 0;
